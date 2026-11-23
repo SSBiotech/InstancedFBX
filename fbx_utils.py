@@ -1714,7 +1714,10 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
         if self._tag == 'OB':
             return self.bdata.matrix_local.copy()
         elif self._tag == 'DP':
-            return self._ref.matrix_world.inverted_safe() @ self._dupli_matrix
+            if self.parent.bdata == self._ref:
+                return self._ref.matrix_world.inverted_safe() @ self._dupli_matrix
+            else:
+                return self.parent.matrix_global.inverted_safe() @ self._dupli_matrix
         else:  # 'BO', current pose
             # PoseBone.matrix is in armature space, bring in back in real local one!
             par = self.bdata.parent
