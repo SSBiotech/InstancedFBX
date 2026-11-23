@@ -1631,7 +1631,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             if bdata.is_instance:
                 # Note that dupli instance matrix is set by meta-class initialization.
                 self._tag = 'DP'
-                self.name = "|".join(re.sub(r"\.(\d{3})", r"\1", get_blenderID_name(bdata.instance_object.original)).split(".")[-2:])
+                self.name = re.sub(r"\.(\d{3})", r"\1", get_blenderID_name(bdata.instance_object.original))
                 self.bdata = bdata.instance_object.original
                 self._ref = bdata.parent.original
                 self._ids = self.get_num_id(bdata)
