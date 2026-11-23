@@ -1670,16 +1670,6 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
 
     fbx_uuid = property(get_fbx_uuid)
 
-    def get_parent_fbx_uuid(self):
-        by_name = Faster_ObjectWrapper.all_names.get(self._name.rsplit(".", 1)[0], None)
-        if by_name is not None:
-            return by_name.fbx_uuid
-        by_id = Faster_ObjectWrapper.all_ids.get(".".join(self._ids[:-1]), None)
-        if by_id is not None:
-            return by_id.fbx_uuid
-        else:
-            return None
-
     # XXX Not sure how much that’s useful now... :/
     def get_hide(self):
         return self.bdata.hide_viewport if self._tag in {'OB', 'DP'} else self.bdata.hide
@@ -1700,7 +1690,14 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
                 # Mere object parenting.
                 return Faster_ObjectWrapper(self.bdata.parent)
         elif self._tag == 'DP':
-            return Faster_ObjectWrapper(self._ref)
+            by_name = Faster_ObjectWrapper.all_names.get(self._name.rsplit(".", 1)[0], None)
+            if by_name is not None:
+                return by_name
+            by_id = Faster_ObjectWrapper.all_ids.get(".".join(self._ids[:-1]), None)
+            if by_id is not None:
+                return by_id
+            else:
+                return Faster_ObjectWrapper(self._ref)
         else:  # self._tag == 'BO'
             return Faster_ObjectWrapper(self.bdata.parent, self._ref) or Faster_ObjectWrapper(self._ref)
 

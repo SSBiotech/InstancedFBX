@@ -3079,13 +3079,7 @@ def fbx_data_from_scene(scene, depsgraph, settings):
         if not ob_obj.is_bone:
             par_obj = ob_obj.parent
             # Meshes parented to armature are handled separately, yet we want the 'no parent' connection (0).
-            if ob_obj._tag == 'DP':
-                uuid = ob_obj.get_parent_fbx_uuid()
-                if uuid is not None:
-                    connections.append((b"OO", ob_obj.fbx_uuid, uuid, None))
-                elif par_obj and ob_obj.has_valid_parent(objects) and (par_obj, ob_obj) not in arm_parents:
-                    connections.append((b"OO", ob_obj.fbx_uuid, par_obj.fbx_uuid, None))
-            elif par_obj and ob_obj.has_valid_parent(objects) and (par_obj, ob_obj) not in arm_parents:
+            if par_obj and ob_obj.has_valid_parent(objects) and (par_obj, ob_obj) not in arm_parents:
                 connections.append((b"OO", ob_obj.fbx_uuid, par_obj.fbx_uuid, None))
             else:
                 connections.append((b"OO", ob_obj.fbx_uuid, 0, None))
