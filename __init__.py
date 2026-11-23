@@ -45,8 +45,8 @@ from bpy_extras.io_utils import (
 
 @orientation_helper(axis_forward='-Z', axis_up='Y')
 class FasterExportFBX(bpy.types.Operator, ExportHelper):
-    """Write a FBX file"""
-    bl_idname = "export_scene.faster_fbx"
+    """Write a Unity FBX file"""
+    bl_idname = "export_scene.unity_fbx"
     bl_label = "Export FBX"
     bl_options = {'UNDO', 'PRESET'}
 
@@ -59,7 +59,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     use_selection: BoolProperty(
         name="Selected Objects",
         description="Export selected and visible objects only",
-        default=True,
+        default=False,
     )
     use_visible: BoolProperty(
         name='Visible Objects',
@@ -74,7 +74,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     use_active_collection: BoolProperty(
         name="Active Collection",
         description="Export only objects from the active collection (and its children)",
-        default=False,
+        default=True,
     )
     collection: StringProperty(
         name="Source Collection",
@@ -110,6 +110,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
         description="How to apply custom and units scalings in generated FBX file "
         "(Blender uses FBX scale to detect units on import, "
         "but many other applications do not handle the same way)",
+        default='FBX_SCALE_ALL'
     )
 
     use_space_transform: BoolProperty(
@@ -137,7 +138,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
                ('OTHER', "Other", "Other geometry types, like curve, meta-ball, etc. (converted to meshes)"),
                ),
         description="Which kind of object to export",
-        default={'EMPTY', 'CAMERA', 'LIGHT', 'ARMATURE', 'MESH', 'OTHER'},
+        default={'EMPTY', 'LIGHT', 'MESH', 'OTHER'},
     )
 
     use_mesh_modifiers_render: BoolProperty(
@@ -163,7 +164,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
                ('LINEAR', "Linear", "Export colors in linear color space"),
                ),
         description="Export vertex color attributes",
-        default='SRGB',
+        default='NONE',
     )
     prioritize_active_color: BoolProperty(
         name="Prioritize Active Color",
@@ -179,7 +180,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     pack_textures_to_fbx: BoolProperty(
     name="Include Textures",
     description="Packs the textures into the .fbx file",
-    default=True,
+    default=False,
     )
     use_mesh_edges: BoolProperty(
         name="Loose Edges",
@@ -195,7 +196,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     use_triangles: BoolProperty(
         name="Triangulate Faces",
         description="Convert all faces to triangles",
-        default=False,
+        default=True,
     )
     use_custom_props: BoolProperty(
         name="Custom Properties",
@@ -206,7 +207,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
         name="Add Leaf Bones",
         description="Append a final bone to the end of each chain to specify last bone length "
         "(use this when you intend to edit the armature from exported data)",
-        default=True  # False for commit!
+        default=False  # False for commit!
     )
     primary_bone_axis: EnumProperty(
         name="Primary Bone Axis",
@@ -455,7 +456,7 @@ def export_panel_animation(layout, operator):
 
 
 def menu_func_export(self, context):
-    self.layout.operator(FasterExportFBX.bl_idname, text="Faster FBX (.fbx)")
+    self.layout.operator(FasterExportFBX.bl_idname, text="Unity FBX (.fbx)")
 
 
 classes = (
