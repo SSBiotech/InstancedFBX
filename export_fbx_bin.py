@@ -2659,6 +2659,10 @@ def fbx_data_from_scene(scene, depsgraph, settings):
             continue
         ob_obj = Faster_ObjectWrapper(ob)
         prendered_objects[ob_obj] = None
+        for dp_obj in ob_obj.dupli_list_gen(depsgraph):
+            if dp_obj.type not in dp_objtypes:
+                continue
+            prendered_objects[dp_obj] = None
 
     # This is rather simple for now, maybe we could end generating templates with most-used values
     # instead of default ones?

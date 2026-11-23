@@ -4,6 +4,7 @@
 # SPDX-License-Identifier: GPL-2.0-or-later
 
 import math
+import re
 import time
 
 from collections import namedtuple
@@ -1586,10 +1587,11 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
     __slots__ = (
         'name', 'key', 'bdata', 'parented_to_armature', 'override_materials',
         '_tag', '_ref', '_dupli_matrix'
-        , 'ids'
+        , '_ids', '_name'
     )
 
     all_ids = {}
+    all_names = {}
 
     @classmethod
     def cache_clear(cls):
@@ -1605,6 +1607,11 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
         Faster_ObjectWrapper.all_ids[".".join(ids)] = self
         return ids
 
+    def get_name_id(self, bdata):
+        name = get_blenderID_name(bdata.instance_object.original)
+        Faster_ObjectWrapper.all_names[name] = self
+        return name
+
     def __init__(self, bdata, armature=None):
         """
         bdata might be an Object (deprecated), DepsgraphObjectInstance, Bone or PoseBone.
@@ -1618,21 +1625,24 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             self.name = get_blenderID_name(bdata)
             self.bdata = bdata
             self._ref = None
-            self.ids = None
+            self._ids = None
+            self._name = None
         elif isinstance(bdata, DepsgraphObjectInstance):
             if bdata.is_instance:
                 # Note that dupli instance matrix is set by meta-class initialization.
                 self._tag = 'DP'
-                self.name = "|".join((self._get_dup_num_id(bdata), get_blenderID_name(bdata.instance_object.original)))
+                self.name = re.sub(r"\.(\d{3})", r"\1", get_blenderID_name(bdata.instance_object.original)).rpartition(".")[2]
                 self.bdata = bdata.instance_object.original
                 self._ref = bdata.parent.original
-                self.ids = self.get_num_id(bdata)
+                self._ids = self.get_num_id(bdata)
+                self._name = self.get_name_id(bdata)
             else:
                 self._tag = 'OB'
                 self.name = get_blenderID_name(bdata)
                 self.bdata = bdata.object.original
                 self._ref = None
-                self.ids = None
+                self._ids = None
+                self._name = None
         else:  # isinstance(bdata, (Bone, PoseBone)):
             if isinstance(bdata, PoseBone):
                 bdata = armature.data.bones[bdata.name]
@@ -1640,7 +1650,8 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             self.name = get_blenderID_name(bdata)
             self.bdata = bdata
             self._ref = armature
-            self.ids = None
+            self._ids = None
+            self._name = None
         self.parented_to_armature = False
         self.override_materials = None
 
@@ -1660,9 +1671,12 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
     fbx_uuid = property(get_fbx_uuid)
 
     def get_parent_fbx_uuid(self):
-        obj = Faster_ObjectWrapper.all_ids.get(".".join(self.ids[:-1]), None)
-        if obj is not None:
-            return obj.fbx_uuid
+        by_name = Faster_ObjectWrapper.all_names.get(self._name.rsplit(".", 1)[0], None)
+        if by_name is not None:
+            return by_name.fbx_uuid
+        by_id = Faster_ObjectWrapper.all_ids.get(".".join(self._ids[:-1]), None)
+        if by_id is not None:
+            return by_id.fbx_uuid
         else:
             return None
 
