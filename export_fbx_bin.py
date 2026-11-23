@@ -2653,6 +2653,13 @@ def fbx_data_from_scene(scene, depsgraph, settings):
 
     perfmon.step("FBX export prepare: Wrapping Objects...")
 
+    prendered_objects = {}
+    for ob in settings.context_objects:
+        if ob.type not in objtypes:
+            continue
+        ob_obj = Faster_ObjectWrapper(ob)
+        prendered_objects[ob_obj] = None
+
     # This is rather simple for now, maybe we could end generating templates with most-used values
     # instead of default ones?
     objects = {}  # Because we do not have any ordered set...
@@ -3068,7 +3075,13 @@ def fbx_data_from_scene(scene, depsgraph, settings):
         if not ob_obj.is_bone:
             par_obj = ob_obj.parent
             # Meshes parented to armature are handled separately, yet we want the 'no parent' connection (0).
-            if par_obj and ob_obj.has_valid_parent(objects) and (par_obj, ob_obj) not in arm_parents:
+            if ob_obj._tag == 'DP':
+                uuid = ob_obj.get_parent_fbx_uuid()
+                if uuid is not None:
+                    connections.append((b"OO", ob_obj.fbx_uuid, uuid, None))
+                elif par_obj and ob_obj.has_valid_parent(objects) and (par_obj, ob_obj) not in arm_parents:
+                    connections.append((b"OO", ob_obj.fbx_uuid, par_obj.fbx_uuid, None))
+            elif par_obj and ob_obj.has_valid_parent(objects) and (par_obj, ob_obj) not in arm_parents:
                 connections.append((b"OO", ob_obj.fbx_uuid, par_obj.fbx_uuid, None))
             else:
                 connections.append((b"OO", ob_obj.fbx_uuid, 0, None))

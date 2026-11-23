@@ -1586,7 +1586,10 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
     __slots__ = (
         'name', 'key', 'bdata', 'parented_to_armature', 'override_materials',
         '_tag', '_ref', '_dupli_matrix'
+        , 'ids'
     )
+
+    all_ids = {}
 
     @classmethod
     def cache_clear(cls):
@@ -1595,16 +1598,12 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
 
     @staticmethod
     def _get_dup_num_id(bdata):
-        INVALID_IDS = {2147483647, 0}
-        pids = tuple(bdata.persistent_id)
-        idx_valid = 0
-        prev_i = ...
-        for idx, i in enumerate(pids[::-1]):
-            if i not in INVALID_IDS or (idx == len(pids) and i == 0 and prev_i != 0):
-                idx_valid = len(pids) - idx
-                break
-            prev_i = i
-        return ".".join(str(i) for i in pids[:idx_valid])
+        return ".".join(str(i) for i in tuple(bdata.persistent_id)[::-1] if i != 2147483647)
+
+    def get_num_id(self, bdata):
+        ids = list(str(i) for i in tuple(bdata.persistent_id)[::-1] if i != 2147483647)
+        Faster_ObjectWrapper.all_ids[".".join(ids)] = self
+        return ids
 
     def __init__(self, bdata, armature=None):
         """
@@ -1619,18 +1618,21 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             self.name = get_blenderID_name(bdata)
             self.bdata = bdata
             self._ref = None
+            self.ids = None
         elif isinstance(bdata, DepsgraphObjectInstance):
             if bdata.is_instance:
                 # Note that dupli instance matrix is set by meta-class initialization.
                 self._tag = 'DP'
-                self.name = "|".join((get_blenderID_name((bdata.parent.original, bdata.instance_object.original)), "Dupli", self._get_dup_num_id(bdata)))
+                self.name = "|".join((self._get_dup_num_id(bdata), get_blenderID_name(bdata.instance_object.original)))
                 self.bdata = bdata.instance_object.original
                 self._ref = bdata.parent.original
+                self.ids = self.get_num_id(bdata)
             else:
                 self._tag = 'OB'
                 self.name = get_blenderID_name(bdata)
                 self.bdata = bdata.object.original
                 self._ref = None
+                self.ids = None
         else:  # isinstance(bdata, (Bone, PoseBone)):
             if isinstance(bdata, PoseBone):
                 bdata = armature.data.bones[bdata.name]
@@ -1638,6 +1640,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             self.name = get_blenderID_name(bdata)
             self.bdata = bdata
             self._ref = armature
+            self.ids = None
         self.parented_to_armature = False
         self.override_materials = None
 
@@ -1655,6 +1658,13 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
         return get_fbx_uuid_from_key(self.key)
 
     fbx_uuid = property(get_fbx_uuid)
+
+    def get_parent_fbx_uuid(self):
+        obj = Faster_ObjectWrapper.all_ids.get(".".join(self.ids[:-1]), None)
+        if obj is not None:
+            return obj.fbx_uuid
+        else:
+            return None
 
     # XXX Not sure how much that’s useful now... :/
     def get_hide(self):
