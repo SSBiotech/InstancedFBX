@@ -17,14 +17,13 @@ bl_info = {
     "category": "Import-Export",
 }
 
-
 if "bpy" in locals():
     import importlib
+
     if "export_fbx_bin" in locals():
         importlib.reload(export_fbx_bin)
     if "export_fbx" in locals():
         importlib.reload(export_fbx)
-
 
 import bpy
 from bpy.props import (
@@ -42,6 +41,7 @@ from bpy_extras.io_utils import (
     axis_conversion,
     poll_file_object_drop,
 )
+
 
 @orientation_helper(axis_forward='-Z', axis_up='Y')
 class FasterExportFBX(bpy.types.Operator, ExportHelper):
@@ -108,22 +108,22 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
                ),
         name="Apply Scalings",
         description="How to apply custom and units scalings in generated FBX file "
-        "(Blender uses FBX scale to detect units on import, "
-        "but many other applications do not handle the same way)",
+                    "(Blender uses FBX scale to detect units on import, "
+                    "but many other applications do not handle the same way)",
         default='FBX_SCALE_ALL'
     )
 
     use_space_transform: BoolProperty(
         name="Use Space Transform",
         description="Apply global space transform to the object rotations. When disabled "
-        "only the axis space is written to the file and all object transforms are left as-is",
+                    "only the axis space is written to the file and all object transforms are left as-is",
         default=True,
     )
     bake_space_transform: BoolProperty(
         name="Apply Transform",
         description="Bake space transform into object data, avoids getting unwanted rotations to objects when "
-        "target space is not aligned with Blender's space "
-        "(WARNING! experimental option, use at own risk, known to be broken with armatures/animations)",
+                    "target space is not aligned with Blender's space "
+                    "(WARNING! experimental option, use at own risk, known to be broken with armatures/animations)",
         default=False,
     )
 
@@ -154,7 +154,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
                ('SMOOTH_GROUP', "Smoothing Groups", "Write face smoothing groups"),
                ),
         description="Export smoothing information "
-        "(prefer 'Normals Only' option if your target importer understands custom normals)",
+                    "(prefer 'Normals Only' option if your target importer understands custom normals)",
         default='OFF',
     )
     colors_type: EnumProperty(
@@ -169,7 +169,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     prioritize_active_color: BoolProperty(
         name="Prioritize Active Color",
         description="Make sure active color will be exported first. Could be important "
-        "since some other software can discard other color attributes besides the first one",
+                    "since some other software can discard other color attributes besides the first one",
         default=False,
     )
     export_only_UDP3DSMAX_object_props: BoolProperty(
@@ -178,9 +178,9 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
         default=False,
     )
     pack_textures_to_fbx: BoolProperty(
-    name="Include Textures",
-    description="Packs the textures into the .fbx file",
-    default=False,
+        name="Include Textures",
+        description="Packs the textures into the .fbx file",
+        default=False,
     )
     use_mesh_edges: BoolProperty(
         name="Loose Edges",
@@ -190,7 +190,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     use_tspace: BoolProperty(
         name="Tangent Space",
         description="Add binormal and tangent vectors, together with normal they form the tangent space "
-        "(will only work correctly with tris/quads only meshes!)",
+                    "(will only work correctly with tris/quads only meshes!)",
         default=False,
     )
     use_triangles: BoolProperty(
@@ -206,7 +206,7 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     add_leaf_bones: BoolProperty(
         name="Add Leaf Bones",
         description="Append a final bone to the end of each chain to specify last bone length "
-        "(use this when you intend to edit the armature from exported data)",
+                    "(use this when you intend to edit the armature from exported data)",
         default=False  # False for commit!
     )
     primary_bone_axis: EnumProperty(
@@ -243,8 +243,8 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
                ('LIMBNODE', "LimbNode", "'LimbNode' FBX node, a regular joint between two bones..."),
                ),
         description="FBX type of node (object) used to represent Blender's armatures "
-        "(use the Null type unless you experience issues with the other app, "
-        "as other choices may not import back perfectly into Blender...)",
+                    "(use the Null type unless you experience issues with the other app, "
+                    "as other choices may not import back perfectly into Blender...)",
         default='NULL',
     )
     bake_anim: BoolProperty(
@@ -259,20 +259,20 @@ class FasterExportFBX(bpy.types.Operator, ExportHelper):
     bake_anim_use_all_bones: BoolProperty(
         name="Key All Bones",
         description="Force exporting at least one key of animation for all bones "
-        "(needed with some target applications, like UE4)",
+                    "(needed with some target applications, like UE4)",
         default=True,
     )
     bake_anim_use_nla_strips: BoolProperty(
         name="NLA Strips",
         description="Export each non-muted NLA strip as a separated FBX's AnimStack, if any, "
-        "instead of global scene animation",
+                    "instead of global scene animation",
         default=True,
     )
     bake_anim_use_all_actions: BoolProperty(
         name="All Actions",
         description="Export each action as a separated FBX's AnimStack, instead of global scene animation "
-        "(note that animated objects will get all actions compatible with them, "
-        "others will get no animation at all)",
+                    "(note that animated objects will get all actions compatible with them, "
+                    "others will get no animation at all)",
         default=True,
     )
     bake_anim_force_startend_keying: BoolProperty(

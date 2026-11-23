@@ -49,7 +49,6 @@ Note that key:value pairs aren't used since the id's are not
 ensured to be unique.
 """
 
-
 # ----------------------------------------------------------------------------
 # FBX Binary Parser
 
@@ -65,6 +64,7 @@ read_fbx_elem_uint = ...
 _IS_BIG_ENDIAN = (__import__("sys").byteorder != 'little')
 _HEAD_MAGIC = b'Kaydara FBX Binary\x20\x20\x00\x1a\x00'
 from collections import namedtuple
+
 FBXElem = namedtuple("FBXElem", ("id", "props", "props_type", "elems"))
 del namedtuple
 
@@ -110,18 +110,18 @@ def unpack_array(read, array_type, array_stride, array_byteswap):
 read_data_dict = {
     b'Z'[0]: lambda read: unpack(b'<b', read(1))[0],  # 8 bit int
     b'Y'[0]: lambda read: unpack(b'<h', read(2))[0],  # 16 bit int
-    b'B'[0]: lambda read: unpack(b'?', read(1))[0],   # 1 bit bool (yes/no)
+    b'B'[0]: lambda read: unpack(b'?', read(1))[0],  # 1 bit bool (yes/no)
     b'C'[0]: lambda read: unpack(b'<c', read(1))[0],  # char
     b'I'[0]: lambda read: unpack(b'<i', read(4))[0],  # 32 bit int
     b'F'[0]: lambda read: unpack(b'<f', read(4))[0],  # 32 bit float
     b'D'[0]: lambda read: unpack(b'<d', read(8))[0],  # 64 bit float
     b'L'[0]: lambda read: unpack(b'<q', read(8))[0],  # 64 bit int
-    b'R'[0]: lambda read: read(read_uint(read)),      # binary data
-    b'S'[0]: lambda read: read(read_uint(read)),      # string data
+    b'R'[0]: lambda read: read(read_uint(read)),  # binary data
+    b'S'[0]: lambda read: read(read_uint(read)),  # string data
     b'f'[0]: lambda read: unpack_array(read, 'f', 4, False),  # array (float)
-    b'i'[0]: lambda read: unpack_array(read, 'i', 4, True),   # array (int)
+    b'i'[0]: lambda read: unpack_array(read, 'i', 4, True),  # array (int)
     b'd'[0]: lambda read: unpack_array(read, 'd', 8, False),  # array (double)
-    b'l'[0]: lambda read: unpack_array(read, 'q', 8, True),   # array (long)
+    b'l'[0]: lambda read: unpack_array(read, 'q', 8, True),  # array (long)
     b'b'[0]: lambda read: unpack_array(read, 'b', 1, False),  # array (bool)
     b'c'[0]: lambda read: unpack_array(read, 'B', 1, False),  # array (ubyte)
 }
@@ -156,10 +156,10 @@ def read_elem(read, tell, use_namedtuple):
     prop_count = read_fbx_elem_uint(read)
     prop_length = read_fbx_elem_uint(read)
 
-    elem_id = read_string_ubyte(read)        # elem name of the scope/key
+    elem_id = read_string_ubyte(read)  # elem name of the scope/key
     elem_props_type = bytearray(prop_count)  # elem property types
-    elem_props_data = [None] * prop_count    # elem properties (if any)
-    elem_subtree = []                        # elem children (if any)
+    elem_props_data = [None] * prop_count  # elem properties (if any)
+    elem_subtree = []  # elem children (if any)
 
     for i in range(prop_count):
         data_type = read(1)[0]
@@ -249,7 +249,6 @@ parse_bin.__dict__.update(
     dict(
         parse=parse
     ))
-
 
 # ----------------------------------------------------------------------------
 # JSON Converter

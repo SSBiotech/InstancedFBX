@@ -26,6 +26,7 @@ read_fbx_elem_start = ...
 _IS_BIG_ENDIAN = (__import__("sys").byteorder != 'little')
 _HEAD_MAGIC = b'Kaydara FBX Binary\x20\x20\x00\x1a\x00'
 from collections import namedtuple
+
 FBXElem = namedtuple("FBXElem", ("id", "props", "props_type", "elems"))
 del namedtuple
 
@@ -107,10 +108,10 @@ def unpack_array(read, array_type, array_stride, array_byteswap):
 
 
 read_array_dict = {
-    b'b'[0]: lambda read: unpack_array(read, data_types.ARRAY_BOOL, 1, False),     # bool
-    b'c'[0]: lambda read: unpack_array(read, data_types.ARRAY_BYTE, 1, False),     # ubyte
-    b'i'[0]: lambda read: unpack_array(read, data_types.ARRAY_INT32, 4, True),     # int
-    b'l'[0]: lambda read: unpack_array(read, data_types.ARRAY_INT64, 8, True),     # long
+    b'b'[0]: lambda read: unpack_array(read, data_types.ARRAY_BOOL, 1, False),  # bool
+    b'c'[0]: lambda read: unpack_array(read, data_types.ARRAY_BYTE, 1, False),  # ubyte
+    b'i'[0]: lambda read: unpack_array(read, data_types.ARRAY_INT32, 4, True),  # int
+    b'l'[0]: lambda read: unpack_array(read, data_types.ARRAY_INT64, 8, True),  # long
     b'f'[0]: lambda read: unpack_array(read, data_types.ARRAY_FLOAT32, 4, False),  # float
     b'd'[0]: lambda read: unpack_array(read, data_types.ARRAY_FLOAT64, 8, False),  # double
 }
@@ -118,14 +119,14 @@ read_array_dict = {
 read_data_dict = {
     b'Z'[0]: lambda read: unpack(b'<b', read(1))[0],  # byte
     b'Y'[0]: lambda read: unpack(b'<h', read(2))[0],  # 16 bit int
-    b'B'[0]: lambda read: unpack(b'?', read(1))[0],   # 1 bit bool (yes/no)
+    b'B'[0]: lambda read: unpack(b'?', read(1))[0],  # 1 bit bool (yes/no)
     b'C'[0]: lambda read: unpack(b'<c', read(1))[0],  # char
     b'I'[0]: lambda read: unpack(b'<i', read(4))[0],  # 32 bit int
     b'F'[0]: lambda read: unpack(b'<f', read(4))[0],  # 32 bit float
     b'D'[0]: lambda read: unpack(b'<d', read(8))[0],  # 64 bit float
     b'L'[0]: lambda read: unpack(b'<q', read(8))[0],  # 64 bit int
-    b'R'[0]: lambda read: read(read_uint(read)),      # binary data
-    b'S'[0]: lambda read: read(read_uint(read)),      # string data
+    b'R'[0]: lambda read: read(read_uint(read)),  # binary data
+    b'S'[0]: lambda read: read(read_uint(read)),  # string data
 }
 
 
@@ -160,8 +161,8 @@ def read_elem(read, tell, use_namedtuple, decompress_array_func, tell_file_offse
         return None
 
     elem_props_type = bytearray(prop_count)  # elem property types
-    elem_props_data = [None] * prop_count    # elem properties (if any)
-    elem_subtree = []                        # elem children (if any)
+    elem_props_data = [None] * prop_count  # elem properties (if any)
+    elem_subtree = []  # elem children (if any)
 
     for i in range(prop_count):
         data_type = read(1)[0]

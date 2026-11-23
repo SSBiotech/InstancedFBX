@@ -20,7 +20,6 @@ from mathutils import Vector, Matrix
 
 from . import encode_bin, data_types
 
-
 # "Constants"
 FBX_VERSION = 7400
 # 1004 adds use of "OtherFlags"->"TCDefinition" to control the FBX_KTIME opt-in in FBX version 7700.
@@ -69,13 +68,11 @@ FBX_TIMECODE_DEFINITION_TO_KTIME_PER_SECOND = {
 # The "ktimes" per second for Blender exported FBX is constant because the exported `FBX_VERSION` is constant.
 FBX_KTIME = FBX_KTIME_V8 if FBX_VERSION >= 8000 else FBX_KTIME_V7
 
-
 MAT_CONVERT_LIGHT = Matrix.Rotation(math.pi / 2.0, 4, 'X')  # Blender is -Z, FBX is -Y.
 MAT_CONVERT_CAMERA = Matrix.Rotation(math.pi / 2.0, 4, 'Y')  # Blender is -Z, FBX is +X.
 # XXX I can't get this working :(
 # MAT_CONVERT_BONE = Matrix.Rotation(math.pi / 2.0, 4, 'Z')  # Blender is +Y, FBX is -X.
 MAT_CONVERT_BONE = Matrix()
-
 
 BLENDER_OTHER_OBJECT_TYPES = {'CURVE', 'SURFACE', 'FONT', 'META'}
 BLENDER_OBJECT_TYPES_MESHLIKE = {'MESH'} | BLENDER_OTHER_OBJECT_TYPES
@@ -83,24 +80,22 @@ BLENDER_OBJECT_TYPES_MESHLIKE = {'MESH'} | BLENDER_OTHER_OBJECT_TYPES
 SHAPE_KEY_SLIDER_HARD_MIN = bpy.types.ShapeKey.bl_rna.properties["slider_min"].hard_min
 SHAPE_KEY_SLIDER_HARD_MAX = bpy.types.ShapeKey.bl_rna.properties["slider_max"].hard_max
 
-
 # Lamps.
 FBX_LIGHT_TYPES = {
     'POINT': 0,  # Point.
-    'SUN': 1,    # Directional.
-    'SPOT': 2,   # Spot.
-    'HEMI': 1,   # Directional.
-    'AREA': 3,   # Area.
+    'SUN': 1,  # Directional.
+    'SPOT': 2,  # Spot.
+    'HEMI': 1,  # Directional.
+    'AREA': 3,  # Area.
 }
 FBX_LIGHT_DECAY_TYPES = {
-    'CONSTANT': 0,                   # None.
-    'INVERSE_LINEAR': 1,             # Linear.
-    'INVERSE_SQUARE': 2,             # Quadratic.
-    'INVERSE_COEFFICIENTS': 2,       # Quadratic...
-    'CUSTOM_CURVE': 2,               # Quadratic.
+    'CONSTANT': 0,  # None.
+    'INVERSE_LINEAR': 1,  # Linear.
+    'INVERSE_SQUARE': 2,  # Quadratic.
+    'INVERSE_COEFFICIENTS': 2,  # Quadratic...
+    'CUSTOM_CURVE': 2,  # Quadratic.
     'LINEAR_QUADRATIC_WEIGHTED': 2,  # Quadratic.
 }
-
 
 RIGHT_HAND_AXES = {
     # Up, Forward -> FBX values (tuples of (axis, sign), Up, Front, Coord).
@@ -130,7 +125,6 @@ RIGHT_HAND_AXES = {
     ('-Z', 'Y'): ((2, -1), (1, -1), (0, -1)),
 }
 
-
 # NOTE: Not fully in enum value order, since when exporting the first entry matching the frame-rate value is used
 # (e.g. better have NTSC full-frame than NTSC drop frame for 29.97 frame-rate).
 FBX_FRAMERATES = (
@@ -154,7 +148,6 @@ FBX_FRAMERATES = (
     (60.0 / 1.001, 17),
     (120.0 / 1.001, 18),
 )
-
 
 # ##### Misc utilities #####
 
@@ -471,9 +464,9 @@ def astype_view_signedness(arr, new_dtype):
     # Signed and unsigned int are opposite in terms of signedness. Other types don't have signedness.
     integer_kinds = {'i', 'u'}
     if (
-        arr_kind in integer_kinds and new_kind in integer_kinds
-        and arr_dtype.itemsize == new_dtype.itemsize
-        and arr_dtype.byteorder == new_dtype.byteorder
+            arr_kind in integer_kinds and new_kind in integer_kinds
+            and arr_dtype.itemsize == new_dtype.itemsize
+            and arr_dtype.byteorder == new_dtype.byteorder
     ):
         # arr and new_dtype have signedness and matching itemsize and byteorder, so return a view of the new type.
         return arr.view(new_dtype)
@@ -800,14 +793,14 @@ class Faster_AttributeDescription:
 # See usage of BuiltinCustomDataLayerProvider in Blender source to find most built-in attributes.
 MESH_ATTRIBUTE_MATERIAL_INDEX = Faster_AttributeDescription("material_index", 'INT', 'FACE')
 MESH_ATTRIBUTE_POSITION = Faster_AttributeDescription("position", 'FLOAT_VECTOR', 'POINT',
-                                               is_required_check=lambda attributes: bool(attributes.id_data.vertices))
+                                                      is_required_check=lambda attributes: bool(attributes.id_data.vertices))
 MESH_ATTRIBUTE_SHARP_EDGE = Faster_AttributeDescription("sharp_edge", 'BOOLEAN', 'EDGE')
 MESH_ATTRIBUTE_EDGE_VERTS = Faster_AttributeDescription(".edge_verts", 'INT32_2D', 'EDGE',
-                                                 is_required_check=lambda attributes: bool(attributes.id_data.edges))
+                                                        is_required_check=lambda attributes: bool(attributes.id_data.edges))
 MESH_ATTRIBUTE_CORNER_VERT = Faster_AttributeDescription(".corner_vert", 'INT', 'CORNER',
-                                                  is_required_check=lambda attributes: bool(attributes.id_data.loops))
+                                                         is_required_check=lambda attributes: bool(attributes.id_data.loops))
 MESH_ATTRIBUTE_CORNER_EDGE = Faster_AttributeDescription(".corner_edge", 'INT', 'CORNER',
-                                                  is_required_check=lambda attributes: bool(attributes.id_data.loops))
+                                                         is_required_check=lambda attributes: bool(attributes.id_data.loops))
 MESH_ATTRIBUTE_SHARP_FACE = Faster_AttributeDescription("sharp_face", 'BOOLEAN', 'FACE')
 
 
@@ -827,14 +820,14 @@ def _key_to_uuid(uuids, key):
     # TODO: Check this is robust enough for our needs!
     # Note: We assume we have already checked the related key wasn't yet in _keys_to_uids!
     #       As int64 is signed in FBX, we keep uids below 2**63...
-    if isinstance(key, int) and 0 <= key < 2**63:
+    if isinstance(key, int) and 0 <= key < 2 ** 63:
         # We can use value directly as id!
         uuid = key
     else:
         uuid = hash(key)
         if uuid < 0:
             uuid = -uuid
-        if uuid >= 2**63:
+        if uuid >= 2 ** 63:
             uuid //= 2
     # Try to make our uid shorter!
     if uuid > int(1e9):
@@ -843,10 +836,10 @@ def _key_to_uuid(uuids, key):
             uuid = t_uuid
     # Make sure our uuid *is* unique.
     if uuid in uuids:
-        inc = 1 if uuid < 2**62 else -1
+        inc = 1 if uuid < 2 ** 62 else -1
         while uuid in uuids:
             uuid += inc
-            if 0 > uuid >= 2**63:
+            if 0 > uuid >= 2 ** 63:
                 # Note that this is more that unlikely, but does not harm anyway...
                 raise ValueError("Unable to generate an UUID for key {!r}".format(key))
     return Faster_UUID(uuid)
@@ -1180,8 +1173,8 @@ def elem_props_template_set(template, elem, ptype_name, name, value, animatable=
     # However, animated properties are always written, since they cannot match their template!
     if tmpl_ptype is not None and not animated:
         if (tmpl_written and
-            ((len(ptype) == 3 and (tmpl_val, tmpl_ptype) == (value, ptype_name)) or
-             (len(ptype) > 3 and (tuple(tmpl_val), tmpl_ptype) == (value, ptype_name)))):
+                ((len(ptype) == 3 and (tmpl_val, tmpl_ptype) == (value, ptype_name)) or
+                 (len(ptype) > 3 and (tuple(tmpl_val), tmpl_ptype) == (value, ptype_name)))):
             return  # Already in template and same value.
         _elem_props_set(elem, ptype, name, value, _elem_props_flags(tmpl_animatable, animated, False))
         template[name][3] = True
@@ -1630,8 +1623,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             if bdata.is_instance:
                 # Note that dupli instance matrix is set by meta-class initialization.
                 self._tag = 'DP'
-                self.name = "|".join((get_blenderID_name((bdata.parent.original, bdata.instance_object.original)),
-                                      "Dupli", self._get_dup_num_id(bdata)))
+                self.name = "|".join((get_blenderID_name((bdata.parent.original, bdata.instance_object.original)), "Dupli", self._get_dup_num_id(bdata)))
                 self.bdata = bdata.instance_object.original
                 self._ref = bdata.parent.original
             else:
@@ -1661,11 +1653,13 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
     # #### Common to all _tag values.
     def get_fbx_uuid(self):
         return get_fbx_uuid_from_key(self.key)
+
     fbx_uuid = property(get_fbx_uuid)
 
     # XXX Not sure how much that’s useful now... :/
     def get_hide(self):
         return self.bdata.hide_viewport if self._tag in {'OB', 'DP'} else self.bdata.hide
+
     hide = property(get_hide)
 
     def get_parent(self):
@@ -1685,12 +1679,14 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             return Faster_ObjectWrapper(self._ref)
         else:  # self._tag == 'BO'
             return Faster_ObjectWrapper(self.bdata.parent, self._ref) or Faster_ObjectWrapper(self._ref)
+
     parent = property(get_parent)
 
     def get_bdata_pose_bone(self):
         if self._tag == 'BO':
             return self._ref.pose.bones[self.bdata.name]
         return None
+
     bdata_pose_bone = property(get_bdata_pose_bone)
 
     def get_matrix_local(self):
@@ -1703,6 +1699,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             par = self.bdata.parent
             par_mat_inv = self._ref.pose.bones[par.name].matrix.inverted_safe() if par else Matrix()
             return par_mat_inv @ self._ref.pose.bones[self.bdata.name].matrix
+
     matrix_local = property(get_matrix_local)
 
     def get_matrix_global(self):
@@ -1712,6 +1709,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             return self._dupli_matrix
         else:  # 'BO', current pose
             return self._ref.matrix_world @ self._ref.pose.bones[self.bdata.name].matrix
+
     matrix_global = property(get_matrix_global)
 
     def get_matrix_rest_local(self):
@@ -1722,6 +1720,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             return par_mat_inv @ self.bdata.matrix_local
         else:
             return self.matrix_local.copy()
+
     matrix_rest_local = property(get_matrix_rest_local)
 
     def get_matrix_rest_global(self):
@@ -1729,6 +1728,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
             return self._ref.matrix_world @ self.bdata.matrix_local
         else:
             return self.matrix_global.copy()
+
     matrix_rest_global = property(get_matrix_rest_global)
 
     # #### Transform and helpers
@@ -1834,32 +1834,38 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
     # #### _tag dependent...
     def get_is_object(self):
         return self._tag == 'OB'
+
     is_object = property(get_is_object)
 
     def get_is_dupli(self):
         return self._tag == 'DP'
+
     is_dupli = property(get_is_dupli)
 
     def get_is_bone(self):
         return self._tag == 'BO'
+
     is_bone = property(get_is_bone)
 
     def get_type(self):
         if self._tag in {'OB', 'DP'}:
             return self.bdata.type
         return ...
+
     type = property(get_type)
 
     def get_armature(self):
         if self._tag == 'BO':
             return Faster_ObjectWrapper(self._ref)
         return None
+
     armature = property(get_armature)
 
     def get_bones(self):
         if self._tag == 'OB' and self.bdata.type == 'ARMATURE':
             return (Faster_ObjectWrapper(bo, self.bdata) for bo in self.bdata.data.bones)
         return ()
+
     bones = property(get_bones)
 
     def get_materials(self):
@@ -1869,6 +1875,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
         if self._tag in {'OB', 'DP'}:
             return tuple(slot.material for slot in self.bdata.material_slots)
         return ()
+
     materials = property(get_materials)
 
     def is_deformed_by_armature(self, arm_obj):

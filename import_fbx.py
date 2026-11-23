@@ -9,6 +9,7 @@
 
 if "bpy" in locals():
     import importlib
+
     if "parse_fbx" in locals():
         importlib.reload(parse_fbx)
     if "fbx_utils" in locals():
@@ -310,7 +311,6 @@ def elem_props_get_visibility(elem, elem_prop_id, default=None):
 # Object
 from collections import namedtuple
 
-
 FBXTransformData = namedtuple("FBXTransformData", (
     "loc", "geom_loc",
     "rot", "rot_ofs", "rot_piv", "pre_rot", "pst_rot", "rot_ord", "rot_alt_mat", "geom_rot",
@@ -439,6 +439,7 @@ def blen_read_object_transform_do(transform_data):
 
     # rotation
     def to_rot(rot, rot_ord): return Euler(convert_deg_to_rad_iter(rot), rot_ord).to_matrix().to_4x4()
+
     lcl_rot = to_rot(transform_data.rot, transform_data.rot_ord) @ transform_data.rot_alt_mat
     pre_rot = to_rot(transform_data.pre_rot, 'XYZ')
     pst_rot = to_rot(transform_data.pst_rot, 'XYZ')
@@ -456,17 +457,17 @@ def blen_read_object_transform_do(transform_data):
     geom_scale[0][0], geom_scale[1][1], geom_scale[2][2] = transform_data.geom_sca
 
     base_mat = (
-        lcl_translation @
-        rot_ofs @
-        rot_piv @
-        pre_rot @
-        lcl_rot @
-        pst_rot.inverted_safe() @
-        rot_piv.inverted_safe() @
-        sca_ofs @
-        sca_piv @
-        lcl_scale @
-        sca_piv.inverted_safe()
+            lcl_translation @
+            rot_ofs @
+            rot_piv @
+            pre_rot @
+            lcl_rot @
+            pst_rot.inverted_safe() @
+            rot_piv.inverted_safe() @
+            sca_ofs @
+            sca_piv @
+            lcl_scale @
+            sca_piv.inverted_safe()
     )
     geom_mat = geom_loc @ geom_rot @ geom_scale
     # We return mat without 'geometric transforms' too, because it is to be used for children, sigh...
@@ -553,6 +554,7 @@ def _blen_read_object_transform_do_anim(transform_data, lcl_translation_mat, lcl
     def to_rot_xyz(rot):
         # All the rotations that can be pre-calculated have a fixed XYZ order.
         return Euler(convert_deg_to_rad_iter(rot), 'XYZ').to_matrix().to_4x4()
+
     pre_rot = to_rot_xyz(transform_data.pre_rot)
     pst_rot_inv = to_rot_xyz(transform_data.pst_rot).inverted_safe()
     geom_rot = to_rot_xyz(transform_data.geom_rot)
@@ -2291,18 +2293,18 @@ class FbxImportHelperNode:
         self.is_root = False
         self.is_bone = is_bone
         self.is_armature = False
-        self.armature = None                    # For bones only, relevant armature node.
+        self.armature = None  # For bones only, relevant armature node.
         # True if the hierarchy below this node contains bones, important to support mixed hierarchies.
         self.has_bone_children = False
         # True for leaf-bones added to the end of some bone chains to set the lengths.
         self.is_leaf = False
-        self.pre_matrix = None                  # correction matrix that needs to be applied before the FBX transform
-        self.bind_matrix = None                 # for bones this is the matrix used to bind to the skin
+        self.pre_matrix = None  # correction matrix that needs to be applied before the FBX transform
+        self.bind_matrix = None  # for bones this is the matrix used to bind to the skin
         if fbx_transform_data:
             self.matrix, self.matrix_as_parent, self.matrix_geom = blen_read_object_transform_do(fbx_transform_data)
         else:
             self.matrix, self.matrix_as_parent, self.matrix_geom = (None, None, None)
-        self.post_matrix = None                 # correction matrix that needs to be applied after the FBX transform
+        self.post_matrix = None  # correction matrix that needs to be applied after the FBX transform
         # Objects attached to a bone end not the beginning, this matrix corrects for that.
         self.bone_child_matrix = None
 
@@ -2316,9 +2318,9 @@ class FbxImportHelperNode:
         self.anim_compensation_matrix = None
         self.is_global_animation = False
 
-        self.meshes = None                      # List of meshes influenced by this bone.
-        self.clusters = []                      # Deformer Cluster nodes
-        self.armature_setup = {}                # mesh and armature matrix when the mesh was bound
+        self.meshes = None  # List of meshes influenced by this bone.
+        self.clusters = []  # Deformer Cluster nodes
+        self.armature_setup = {}  # mesh and armature matrix when the mesh was bound
 
         self._parent = None
         self.children = []
@@ -3058,7 +3060,6 @@ def load(operator, context, filepath="",
          use_prepost_rot=True,
          colors_type='SRGB',
          mtl_name_collision_mode="MAKE_UNIQUE"):
-
     global fbx_elem_nil
     fbx_elem_nil = FBXElem('', (), (), ())
 
@@ -3233,6 +3234,7 @@ def load(operator, context, filepath="",
                             # (b'Texture', b'KFbxFileTexture') - eg.
                             key = fbx_def.props[0], fbx_subdef.props[0]
                             fbx_templates[key] = fbx_subdef
+
     _()
     del _
 
@@ -3254,6 +3256,7 @@ def load(operator, context, filepath="",
             assert fbx_obj.props_type[:3] == b'LSS'
             fbx_uuid = elem_uuid(fbx_obj)
             fbx_table_nodes[fbx_uuid] = [fbx_obj, None]
+
     _()
     del _
 
@@ -3274,6 +3277,7 @@ def load(operator, context, filepath="",
                 c_src, c_dst = fbx_link.props[1:3]
                 fbx_connection_map.setdefault(c_src, []).append((c_dst, fbx_link))
                 fbx_connection_map_reverse.setdefault(c_dst, []).append((c_src, fbx_link))
+
     _()
     del _
 
@@ -3291,6 +3295,7 @@ def load(operator, context, filepath="",
             if fbx_obj.props[-1] == b'Mesh':
                 assert blen_data is None
                 fbx_item[1] = blen_read_geom(fbx_tmpl, fbx_obj, settings)
+
     _()
     del _
 
@@ -3308,6 +3313,7 @@ def load(operator, context, filepath="",
                 continue
             assert blen_data is None
             fbx_item[1] = blen_read_material(fbx_tmpl, fbx_obj, settings)
+
     _()
     del _
 
@@ -3330,6 +3336,7 @@ def load(operator, context, filepath="",
             if fbx_obj.id != b'Texture':
                 continue
             fbx_item[1] = blen_read_texture_image(fbx_tmpl_tex, fbx_obj, basedir, settings)
+
     _()
     del _
 
@@ -3347,6 +3354,7 @@ def load(operator, context, filepath="",
             if fbx_obj.props[-1] == b'Camera':
                 assert blen_data is None
                 fbx_item[1] = blen_read_camera(fbx_tmpl, fbx_obj, settings)
+
     _()
     del _
 
@@ -3362,6 +3370,7 @@ def load(operator, context, filepath="",
             if fbx_obj.props[-1] == b'Light':
                 assert blen_data is None
                 fbx_item[1] = blen_read_light(fbx_tmpl, fbx_obj, settings)
+
     _()
     del _
 
@@ -3554,6 +3563,7 @@ def load(operator, context, filepath="",
         root_helper.link_hierarchy(fbx_tmpl, settings, scene)
 
         # root_helper.print_info(0)
+
     _()
     del _
 
@@ -3652,6 +3662,7 @@ def load(operator, context, filepath="",
                 # keyblocks is a list of tuples (mesh, key-block)
                 # matching that shape/blend-shape-channel, for animation.
                 blend_shape_channels.setdefault(bc_uuid, []).extend(keyblocks)
+
     _()
     del _
 
@@ -3732,6 +3743,7 @@ def load(operator, context, filepath="",
                             fbx_asdata.props[2] != b'' or as_uuid not in stacks):
                         continue
                     yield as_uuid
+
             for al_uuid, fbx_alitem in fbx_table_nodes.items():
                 fbx_aldata, _blen_data = fbx_alitem
                 if fbx_aldata.id != b'AnimationLayer' or fbx_aldata.props[2] != b'':
@@ -3893,6 +3905,7 @@ def load(operator, context, filepath="",
         for mesh in processed_meshes:
             if mesh.validate_material_indices():
                 print("WARNING: mesh '%s' had invalid material indices, those were reset to first material" % mesh.name)
+
     _()
     del _
 
@@ -3902,6 +3915,7 @@ def load(operator, context, filepath="",
         material_images = {}
 
         fbx_tmpl = fbx_template_get((b'Material', b'KFbxSurfacePhong'))
+
         # b'KFbxSurfaceLambert'
 
         def texture_mapping_set(fbx_obj, node_texture):
@@ -3917,8 +3931,8 @@ def load(operator, context, filepath="",
                      bool(elem_props_get_enum(fbx_props, b'WrapModeV', 0)))
 
             if (loc == (0.0, 0.0, 0.0) and
-                rot == (0.0, 0.0, 0.0) and
-                scale == (1.0, 1.0, 1.0) and
+                    rot == (0.0, 0.0, 0.0) and
+                    scale == (1.0, 1.0, 1.0) and
                     clamp == False):
                 return
 
@@ -4038,6 +4052,7 @@ def load(operator, context, filepath="",
 
                     for obj in (obj for obj in bpy.data.objects if obj.data == mesh):
                         obj.visible_shadow = False
+
     _()
     del _
 

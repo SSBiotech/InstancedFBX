@@ -14,6 +14,7 @@ from functools import cache
 
 if "bpy" in locals():
     import importlib
+
     if "encode_bin" in locals():
         importlib.reload(encode_bin)
     if "data_types" in locals():
@@ -527,6 +528,7 @@ def fbx_data_element_UDP3DSMAX(props, bid):
         k = str("UDP3DSMAX")
         elem_props_set(props, "p_string", k.encode(), v, custom=True)
 
+
 def fbx_data_element_custom_properties(props, bid):
     """
     Store custom properties of blender ID bid (any mapping-like object, in fact) into FBX properties props.
@@ -857,6 +859,7 @@ def fbx_data_mesh_elements(root, me_obj, scene_data, done_meshes):
     """
     Write the Mesh (Geometry) data block.
     """
+
     # Ugly helper... :/
     def _infinite_gen(val):
         while 1:
@@ -1807,7 +1810,7 @@ def fbx_data_video_elements(root, vid, scene_data):
     # Looks like we'd rather not write any 'Content' element in this case (see T44442).
     # Sounds suspect, but let's try it!
     # ~ else:
-        # ~ elem_data_single_bytes(fbx_vid, b"Content", b"")
+    # ~ elem_data_single_bytes(fbx_vid, b"Content", b"")
 
     # Blender currently has no UI for editing custom properties on Images, but the importer will import Image custom
     # properties from either a Video Node or a Texture Node, preferring a Video node if one exists. We'll propagate
@@ -2114,8 +2117,8 @@ def fbx_data_animation_elements(root, scene_data):
                         # key attributes...
                         # flags...
                         keyattr_flags = (
-                            1 << 2 |   # interpolation mode, 1 = constant, 2 = linear, 3 = cubic.
-                            1 << 8 |   # tangent mode, 8 = auto, 9 = TCB, 10 = user, 11 = generic break,
+                            1 << 2 |  # interpolation mode, 1 = constant, 2 = linear, 3 = cubic.
+                            1 << 8 |  # tangent mode, 8 = auto, 9 = TCB, 10 = user, 11 = generic break,
                             1 << 13 |  # tangent mode, 12 = generic clamp, 13 = generic time independent,
                             1 << 14 |  # tangent mode, 13 + 14 = generic clamp progressive.
                             0,
@@ -2320,7 +2323,7 @@ def fbx_animations_do(scene_data, ref_id, f_start, f_end, start_zero, objects=No
         cam = cam_obj.bdata.data
         acnode_lens = Faster_AnimationCurveNodeWrapper(cam_key, 'CAMERA_FOCAL', force_key, force_sek, (cam.lens,))
         acnode_focus_distance = Faster_AnimationCurveNodeWrapper(cam_key, 'CAMERA_FOCUS_DISTANCE', force_key,
-                                                          force_sek, (cam.dof.focus_distance,))
+                                                                 force_sek, (cam.dof.focus_distance,))
         animdata_cameras[cam_key] = (acnode_lens, acnode_focus_distance, cam)
 
     # Get all parent bdata of animated dupli instances, so that we can quickly identify which instances in
@@ -2757,7 +2760,7 @@ def fbx_data_from_scene(scene, depsgraph, settings):
             # the con is that using custom levelse of subdive will not be applied correctly
             ob_to_convert = ob.evaluated_get(depsgraph)
             tmp_me = bpy.data.meshes.new_from_object(
-                            ob_to_convert, depsgraph=depsgraph)
+                ob_to_convert, depsgraph=depsgraph)
 
             # Usually the materials of the evaluated Object converted to a Mesh will be the same as the original
             # Object, but modifiers, such as Geometry Nodes, can change the materials.
@@ -3249,7 +3252,7 @@ def fbx_header_elements(root, scene_data, skip_time_metadata):
         time = datetime.datetime.now()
     else:
         time = datetime.datetime(1, 1, 1, 1, 1, 1)
-        
+
     elem = elem_empty(header_ext, b"CreationTimeStamp")
     elem_data_single_int32(elem, b"Version", 1000)
     elem_data_single_int32(elem, b"Year", time.year)
@@ -3261,7 +3264,7 @@ def fbx_header_elements(root, scene_data, skip_time_metadata):
     elem_data_single_int32(elem, b"Millisecond", time.microsecond // 1000)
 
     elem_data_single_string_unicode(header_ext, b"Creator", "%s - %s - %d.%d.%d"
-                                                % (app_name, app_ver, addon_ver[0], addon_ver[1], addon_ver[2]))
+                                    % (app_name, app_ver, addon_ver[0], addon_ver[1], addon_ver[2]))
 
     # 'SceneInfo' seems mandatory to get a valid FBX file...
     # TODO use real values!
@@ -3307,7 +3310,7 @@ def fbx_header_elements(root, scene_data, skip_time_metadata):
                                               time.microsecond * 1000))
 
     elem_data_single_string_unicode(root, b"Creator", "%s - %s - %d.%d.%d"
-                                          % (app_name, app_ver, addon_ver[0], addon_ver[1], addon_ver[2]))
+                                    % (app_name, app_ver, addon_ver[0], addon_ver[1], addon_ver[2]))
 
     # ##### Start of GlobalSettings element.
     global_settings = elem_empty(root, b"GlobalSettings")
@@ -3513,7 +3516,7 @@ def save_single(operator, scene, depsgraph, filepath="",
                 apply_unit_scale=False,
                 global_scale=1.0,
                 apply_scale_options='FBX_SCALE_NONE',
-                pack_textures_to_fbx = True,
+                pack_textures_to_fbx=True,
                 axis_up="Z",
                 axis_forward="Y",
                 context_objects=None,
@@ -3534,7 +3537,7 @@ def save_single(operator, scene, depsgraph, filepath="",
                 primary_bone_axis='Y',
                 secondary_bone_axis='X',
                 use_metadata=True,
-                skip_time_metadata = False,
+                skip_time_metadata=False,
                 path_mode='AUTO',
                 use_mesh_edges=True,
                 use_tspace=True,
@@ -3548,7 +3551,6 @@ def save_single(operator, scene, depsgraph, filepath="",
                 prioritize_active_color=False,
                 **kwargs
                 ):
-
     # Clear cached ObjectWrappers (just in case...).
     Faster_ObjectWrapper.cache_clear()
 
@@ -3739,7 +3741,7 @@ def save(operator, context,
         source_collection = None
 
         # if the list is not empty, export only the objects in the list, else use the user properties
-        if names_of_objects_to_export:   
+        if names_of_objects_to_export:
             # convert string to list again
             names_of_objects_to_export = names_of_objects_to_export.strip("[]").replace("'", "").split(", ")
             obj_lookup = {obj.name: obj for obj in bpy.data.objects}
