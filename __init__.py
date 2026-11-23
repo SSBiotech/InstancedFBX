@@ -43,7 +43,7 @@ from bpy_extras.io_utils import (
 )
 
 
-@orientation_helper(axis_forward='-Y', axis_up='Z')
+@orientation_helper(axis_forward='Y', axis_up='Z')
 class FasterExportFBX(bpy.types.Operator, ExportHelper):
     """Write a Unity FBX file"""
     bl_idname = "export_scene.unity_fbx"
