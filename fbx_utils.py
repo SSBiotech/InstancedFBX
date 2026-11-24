@@ -1608,7 +1608,7 @@ class Faster_ObjectWrapper(metaclass=Faster_MetaObjectWrapper):
         return ids
 
     def get_name_id(self, bdata):
-        name = "|".join((".".join(self.get_num_id(bdata)[:-1]), get_blenderID_name(bdata.instance_object.original)))
+        name = "|".join((".".join(self.get_num_id(bdata)[:-1]), re.sub(r"\.(\d{3})", r"\1", get_blenderID_name(bdata.instance_object.original))))
         Faster_ObjectWrapper.all_names[name] = self
         return name
 
